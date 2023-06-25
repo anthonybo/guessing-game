@@ -1,14 +1,28 @@
-$primary-color: #fff;
-$background-color: #333;
-$text-color: #fff;
-
-body {
-  background-color: $background-color;
-  color: $text-color;
-
-  h2 {
-    color: $primary-color;
+.admin-page {
+    background-color: #282c34;
+    color: #fff;
   }
-}
-
-/* Add more styles as needed */
+  
+  .text-field {
+    background-color: #fff;
+  }
+  
+  .login-button {
+    background-color: #61dafb;
+    color: #282c34;
+  }
+  
+  .set-goal-button {
+    background-color: #61dafb;
+    color: #282c34;
+  }
+  
+  .players-list {
+    color: #61dafb;
+  }
+  
+  .clear-players-button {
+    background-color: #61dafb;
+    color: #282c34;
+  }
+  

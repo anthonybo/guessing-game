@@ -48,7 +48,7 @@ class AdminPage extends Component {
   handleLogin = () => {
     const { password } = this.state;
     // Check if the password is correct (you can replace 'adminpassword' with your actual password)
-    if (password === 'adminpassword') {
+    if (password === 'admin') {
       this.setState({ loggedIn: true });
       this.fetchPlayers();
       socket.on('playersUpdated', (updatedPlayers) => {
@@ -91,18 +91,16 @@ class AdminPage extends Component {
     try {
       const response = await axios.get('http://localhost:2000/api/players');
       const players = response.data;
-      const sortedPlayers = players.sort((a, b) => {
-        const differenceA = Math.abs(a.guess - goal);
-        const differenceB = Math.abs(b.guess - goal);
-        return differenceA - differenceB;
-      });
+      const sortedPlayers = players.sort(
+        (a, b) => Math.abs(goal - a.guess) - Math.abs(goal - b.guess)
+      ); // Sort players based on distance from the admin's goal
       const closestPlayer = sortedPlayers.length > 0 ? sortedPlayers[0] : null;
       this.setState({ players: sortedPlayers, closestPlayer });
     } catch (error) {
       console.error(error);
     }
   };
-  
+
   handleClearPlayers = async () => {
     try {
       await axios.post('http://localhost:2000/api/clearPlayers');
@@ -206,6 +204,20 @@ class AdminPage extends Component {
                   </Button>
                 </Box>
 
+                <Typography variant="h3">Top Players:</Typography>
+                {closestPlayer && (
+                  <Typography>
+                    Closest player:{' '}
+                    <span style={{ color: 'blue', fontWeight: 'bold' }}>
+                      {closestPlayer.name}
+                    </span>{' '}
+                    with a guess of{' '}
+                    <span style={{ color: 'blue', fontWeight: 'bold' }}>
+                      {closestPlayer.guess}
+                    </span>
+                  </Typography>
+                )}
+
                 <Typography variant="h3">Players' Guesses:</Typography>
                 <List className="players-list">
                   {players.map((player, index) => (
@@ -222,20 +234,6 @@ class AdminPage extends Component {
                     </ListItem>
                   ))}
                 </List>
-
-                <Typography variant="h3">Top Players:</Typography>
-                {closestPlayer && (
-                  <Typography>
-                    Closest player:{' '}
-                    <span style={{ color: 'blue', fontWeight: 'bold' }}>
-                      {closestPlayer.name}
-                    </span>{' '}
-                    with a guess of{' '}
-                    <span style={{ color: 'blue', fontWeight: 'bold' }}>
-                      {closestPlayer.guess}
-                    </span>
-                  </Typography>
-                )}
 
                 <Button
                   variant="contained"
