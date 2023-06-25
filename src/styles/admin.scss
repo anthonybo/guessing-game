@@ -1,28 +1,106 @@
 .admin-page {
-    background-color: #282c34;
-    color: #fff;
-  }
+    text-align: center;
   
-  .text-field {
-    background-color: #fff;
-  }
+    .alert-box {
+      margin-top: 20px;
+      background-color: #ffca28;
+      color: #000;
+      padding: 10px;
+    }
   
-  .login-button {
-    background-color: #61dafb;
-    color: #282c34;
-  }
+    .admin-title {
+      font-family: 'Arial', sans-serif;
+      font-size: 32px;
+      margin-bottom: 20px;
+    }
   
-  .set-goal-button {
-    background-color: #61dafb;
-    color: #282c34;
-  }
+    .login-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 20px;
+    }
   
-  .players-list {
-    color: #61dafb;
-  }
+    .login-label {
+      font-family: 'Arial', sans-serif;
+      font-size: 20px;
+      margin-bottom: 10px;
+    }
   
-  .clear-players-button {
-    background-color: #61dafb;
-    color: #282c34;
+    .text-field {
+      margin-bottom: 10px;
+    }
+  
+    .login-button {
+      background-color: #4caf50;
+      color: #fff;
+    }
+  
+    .admin-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+  
+    .goal-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+  
+    .goal-label {
+      font-family: 'Arial', sans-serif;
+      font-size: 20px;
+      margin-right: 10px;
+    }
+  
+    .set-goal-button {
+      background-color: #4caf50;
+      color: #fff;
+      margin-top: 10px;
+    }
+  
+    .top-players-title {
+      font-family: 'Arial', sans-serif;
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+  
+    .closest-player {
+      font-family: 'Arial', sans-serif;
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+  
+    .player-name {
+      color: #2196f3; /* Updated vibrant blue color */
+      font-weight: bold;
+    }
+  
+    .player-guess {
+      color: #2196f3; /* Updated vibrant blue color */
+      font-weight: bold;
+    }
+  
+    .players-guesses-title {
+      font-family: 'Arial', sans-serif;
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+  
+    .players-list {
+      margin-bottom: 20px;
+    }
+  
+    .top-player {
+      color: green;
+      font-weight: bold;
+    }
+  
+    .clear-players-button {
+      background-color: #f44336;
+      color: #fff;
+    }
   }
   

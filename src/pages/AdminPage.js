@@ -158,11 +158,11 @@ class AdminPage extends Component {
             </Box>
           )}
 
-          <Typography variant="h2">Admin Page</Typography>
+          <Typography variant="h2" className="admin-title">Admin Page</Typography>
           {!loggedIn ? (
             <Slide direction="up" in={true} timeout={1000}>
-              <Box mb={2}>
-                <Typography>Password:</Typography>
+              <Box mb={2} className="login-container">
+                <Typography variant="h4" className="login-label">Password:</Typography>
                 <TextField
                   id="password"
                   type="password"
@@ -184,9 +184,9 @@ class AdminPage extends Component {
             </Slide>
           ) : (
             <Slide direction="up" in={true} timeout={1000}>
-              <Box mb={2}>
-                <Box mb={2}>
-                  <Typography>Set Goal:</Typography>
+              <Box mb={2} className="admin-container">
+                <Box mb={2} className="goal-container">
+                  <Typography variant="h4" className="goal-label">Set Goal:</Typography>
                   <TextField
                     type="number"
                     value={goal}
@@ -204,21 +204,21 @@ class AdminPage extends Component {
                   </Button>
                 </Box>
 
-                <Typography variant="h3">Top Players:</Typography>
+                <Typography variant="h3" className="top-players-title">Top Players:</Typography>
                 {closestPlayer && (
-                  <Typography>
+                  <Typography className="closest-player">
                     Closest player:{' '}
-                    <span style={{ color: 'blue', fontWeight: 'bold' }}>
+                    <span className="player-name">
                       {closestPlayer.name}
                     </span>{' '}
                     with a guess of{' '}
-                    <span style={{ color: 'blue', fontWeight: 'bold' }}>
+                    <span className="player-guess">
                       {closestPlayer.guess}
                     </span>
                   </Typography>
                 )}
 
-                <Typography variant="h3">Players' Guesses:</Typography>
+                <Typography variant="h3" className="players-guesses-title">Players' Guesses:</Typography>
                 <List className="players-list">
                   {players.map((player, index) => (
                     <ListItem key={player.id}>
@@ -226,10 +226,7 @@ class AdminPage extends Component {
                         primary={`${index + 1}. ${player.name}'s guess: ${
                           player.guess
                         }`}
-                        style={{
-                          color: index === 0 ? 'green' : 'inherit',
-                          fontWeight: index === 0 ? 'bold' : 'normal',
-                        }}
+                        className={index === 0 ? 'top-player' : ''}
                       />
                     </ListItem>
                   ))}
