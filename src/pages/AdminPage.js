@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { TextField, Button, List, ListItem, ListItemText, Typography, Box } from '@mui/material';
+import { styled } from '@mui/system';
 import io from 'socket.io-client';
+import '../styles/admin.scss';
 
 const socket = io('http://localhost:2000', { transports: ['websocket'] });
 
@@ -90,49 +93,61 @@ const AdminPage = () => {
     }
   }, [players, goal]);
 
+  const Section = styled('div')({
+    marginBottom: '20px',
+  });
+
   return (
-    <div>
-      <h2>Admin Page</h2>
+    <Box p={3}>
+      <Typography variant="h2">Admin Page</Typography>
       {!loggedIn ? (
-        <div>
-          <label htmlFor="passwordInput">Password:</label>
-          <input type="password" id="passwordInput" value={password} onChange={handlePasswordChange} />
-          <button onClick={handleLogin}>Login</button>
-        </div>
+        <Section>
+          <Typography>Password:</Typography>
+          <TextField
+            type="password"
+            value={password}
+            onChange={handlePasswordChange}
+          />
+          <Button variant="contained" onClick={handleLogin}>Login</Button>
+        </Section>
       ) : (
-        <div>
-          <div>
-            <label htmlFor="goalInput">Set Goal:</label>
-            <input type="number" id="goalInput" value={goal} onChange={handleGoalChange} />
-            <button onClick={handleSetGoal}>Set</button>
-          </div>
+        <Section>
+          <Section>
+            <Typography>Set Goal:</Typography>
+            <TextField
+              type="number"
+              value={goal}
+              onChange={handleGoalChange}
+            />
+            <Button variant="contained" onClick={handleSetGoal}>Set</Button>
+          </Section>
 
-          <h3>Players' Guesses:</h3>
-          <ul>
+          <Typography variant="h3">Players' Guesses:</Typography>
+          <List>
             {players.map((player) => (
-              <li key={player.id}>
-                {player.name}'s guess: {player.guess}
-              </li>
+              <ListItem key={player.id}>
+                <ListItemText primary={`${player.name}'s guess: ${player.guess}`} />
+              </ListItem>
             ))}
-          </ul>
+          </List>
 
-          <h3>Top Players:</h3>
+          <Typography variant="h3">Top Players:</Typography>
           {closestPlayer && (
-            <p>
+            <Typography>
               Closest player: {closestPlayer.name} with a guess of {closestPlayer.guess}
-            </p>
+            </Typography>
           )}
 
-          <button onClick={handleClearPlayers}>Clear Players</button>
+          <Button variant="contained" onClick={handleClearPlayers}>Clear Players</Button>
 
           {alertMessage && (
-            <div style={{ marginTop: '20px', backgroundColor: 'yellow', padding: '10px' }}>
+            <Box color="black" mt={2} bgcolor="yellow" p={2}>
               {alertMessage}
-            </div>
+            </Box>
           )}
-        </div>
+        </Section>
       )}
-    </div>
+    </Box>
   );
 };
 

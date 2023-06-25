@@ -1,0 +1,14 @@
+$primary-color: #fff;
+$background-color: #333;
+$text-color: #fff;
+
+body {
+  background-color: $background-color;
+  color: $text-color;
+
+  h2 {
+    color: $primary-color;
+  }
+}
+
+/* Add more styles as needed */

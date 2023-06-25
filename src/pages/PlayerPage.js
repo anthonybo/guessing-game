@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { Typography, TextField, Button, List, ListItem, ListItemText, Box } from '@mui/material';
+import '../styles/player.scss';
 
 const PlayerPage = () => {
   const [players, setPlayers] = useState([]);
@@ -41,33 +43,33 @@ const PlayerPage = () => {
   }, []);
 
   return (
-    <div>
-      <h2>Player Page</h2>
-      <div>
-        <label htmlFor="nameInput">Enter Your Name:</label>
-        <input type="text" id="nameInput" value={name} onChange={handleNameChange} />
-      </div>
-      <div>
-        <label htmlFor="guessInput">Enter Your Guess:</label>
-        <input type="number" id="guessInput" value={guess} onChange={handleGuessChange} />
-        <button onClick={handleGuessSubmit}>Submit</button>
-      </div>
+    <Box p={3}>
+      <Typography variant="h2">Player Page</Typography>
+      <Box mb={2}>
+        <Typography>Enter Your Name:</Typography>
+        <TextField type="text" value={name} onChange={handleNameChange} fullWidth />
+      </Box>
+      <Box mb={2}>
+        <Typography>Enter Your Guess:</Typography>
+        <TextField type="number" value={guess} onChange={handleGuessChange} fullWidth />
+        <Button variant="contained" onClick={handleGuessSubmit}>Submit</Button>
+      </Box>
 
-      <h3>Players' Guesses:</h3>
-      <ul>
+      <Typography variant="h3">Players' Guesses:</Typography>
+      <List>
         {players.map((player) => (
-          <li key={player.id}>
-            {player.name}: {player.guess}
-          </li>
+          <ListItem key={player.id}>
+            <ListItemText primary={`${player.name}: ${player.guess}`} />
+          </ListItem>
         ))}
-      </ul>
+      </List>
 
       {alertMessage && (
-        <div style={{ marginTop: '20px', backgroundColor: 'yellow', padding: '10px' }}>
+        <Box color="black" mt={2} bgcolor="yellow" p={2}>
           {alertMessage}
-        </div>
+        </Box>
       )}
-    </div>
+    </Box>
   );
 };
 
