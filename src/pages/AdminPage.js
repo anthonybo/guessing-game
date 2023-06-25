@@ -1,154 +1,211 @@
-import React, { useState, useEffect } from 'react';
+import React, { Component } from 'react';
 import axios from 'axios';
-import { TextField, Button, List, ListItem, ListItemText, Typography, Box } from '@mui/material';
-import { styled } from '@mui/system';
-import io from 'socket.io-client';
+import {
+  TextField,
+  Button,
+  List,
+  ListItem,
+  ListItemText,
+  Typography,
+  Box,
+} from '@mui/material';
 import '../styles/admin.scss';
+import io from 'socket.io-client';
 
 const socket = io('http://localhost:2000', { transports: ['websocket'] });
 
-const AdminPage = () => {
-  const [password, setPassword] = useState('');
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [goal, setGoal] = useState('');
-  const [players, setPlayers] = useState([]);
-  const [closestPlayer, setClosestPlayer] = useState(null);
-  const [alertMessage, setAlertMessage] = useState('');
+class AdminPage extends Component {
+  constructor(props) {
+    super(props);
+    this.passwordRef = React.createRef();
+    this.goalRef = React.createRef();
+    this.state = {
+      password: '',
+      loggedIn: false,
+      goal: '',
+      players: [],
+      closestPlayer: null,
+      alertMessage: '',
+    };
+  }
 
-  const handlePasswordChange = (event) => {
-    setPassword(event.target.value);
+  componentDidMount() {
+    this.passwordRef.current.focus();
+  }
+
+  handlePasswordChange = (event) => {
+    this.setState({ password: event.target.value });
   };
 
-  const handleLogin = () => {
+  handlePasswordKeyUp = (event) => {
+    if (event.key === 'Enter') {
+      this.handleLogin();
+    }
+  };
+
+  handleLogin = () => {
+    const { password } = this.state;
     // Check if the password is correct (you can replace 'adminpassword' with your actual password)
     if (password === 'adminpassword') {
-      setLoggedIn(true);
-      fetchPlayers();
+      this.setState({ loggedIn: true });
+      this.fetchPlayers();
       socket.on('playersUpdated', (updatedPlayers) => {
-        setPlayers(updatedPlayers);
+        this.setState({ players: updatedPlayers });
       });
     } else {
-      setAlertMessage('Incorrect password');
+      this.setState({ alertMessage: 'Incorrect password' });
       setTimeout(() => {
-        setAlertMessage('');
+        this.setState({ alertMessage: '' });
       }, 3000);
     }
   };
 
-  const handleGoalChange = (event) => {
-    setGoal(event.target.value);
+  handleGoalChange = (event) => {
+    this.setState({ goal: event.target.value });
   };
 
-  const handleSetGoal = async () => {
+  handleSetGoal = async () => {
+    const { goal } = this.state;
     try {
       await axios.post('http://localhost:2000/api/goal', { goal });
-      setAlertMessage('Goal set successfully!');
+      this.setState({ alertMessage: 'Goal set successfully!' });
       setTimeout(() => {
-        setAlertMessage('');
+        this.setState({ alertMessage: '' });
       }, 3000);
     } catch (error) {
       console.error(error);
-      setAlertMessage('Failed to set the goal.');
+      this.setState({ alertMessage: 'Failed to set the goal.' });
       setTimeout(() => {
-        setAlertMessage('');
+        this.setState({ alertMessage: '' });
       }, 3000);
     }
   };
 
-  const fetchPlayers = async () => {
+  fetchPlayers = async () => {
+    const { goal } = this.state;
     try {
       const response = await axios.get('http://localhost:2000/api/players');
-      setPlayers(response.data);
+      const players = response.data;
+      const sortedPlayers = players.sort(
+        (a, b) =>
+          Math.abs(a.guess - goal) - Math.abs(b.guess - goal) ||
+          a.guess - b.guess
+      );
+      const closestPlayer = sortedPlayers.length > 0 ? sortedPlayers[0] : null;
+      this.setState({ players: sortedPlayers, closestPlayer });
     } catch (error) {
       console.error(error);
     }
   };
 
-  const handleClearPlayers = async () => {
+  handleClearPlayers = async () => {
     try {
       await axios.post('http://localhost:2000/api/clearPlayers');
-      setPlayers([]);
-      setClosestPlayer(null);
-      setAlertMessage('Players cleared successfully!');
+      this.setState({
+        players: [],
+        closestPlayer: null,
+        alertMessage: 'Players cleared successfully!',
+      });
       setTimeout(() => {
-        setAlertMessage('');
+        this.setState({ alertMessage: '' });
       }, 3000);
     } catch (error) {
       console.error(error);
-      setAlertMessage('Failed to clear players.');
+      this.setState({ alertMessage: 'Failed to clear players.' });
       setTimeout(() => {
-        setAlertMessage('');
+        this.setState({ alertMessage: '' });
       }, 3000);
     }
   };
 
-  useEffect(() => {
-    if (players.length > 0 && goal !== '') {
-      const closest = players.reduce((prev, curr) =>
-        Math.abs(curr.guess - goal) < Math.abs(prev.guess - goal) ? curr : prev
-      );
-      setClosestPlayer(closest);
-    } else {
-      setClosestPlayer(null);
+  componentDidUpdate(prevProps, prevState) {
+    const { players, goal, closestPlayer } = this.state;
+
+    if (players.length === 0 || goal === '') {
+      if (closestPlayer !== null) {
+        this.setState({ closestPlayer: null });
+      }
+    } else if (players.length > 0 && closestPlayer === null) {
+      this.setState({ closestPlayer: players[0] });
     }
-  }, [players, goal]);
+  }
 
-  const Section = styled('div')({
-    marginBottom: '20px',
-  });
+  render() {
+    const {
+      password,
+      loggedIn,
+      goal,
+      players,
+      closestPlayer,
+      alertMessage,
+    } = this.state;
 
-  return (
-    <Box p={3}>
-      <Typography variant="h2">Admin Page</Typography>
-      {!loggedIn ? (
-        <Section>
-          <Typography>Password:</Typography>
-          <TextField
-            type="password"
-            value={password}
-            onChange={handlePasswordChange}
-          />
-          <Button variant="contained" onClick={handleLogin}>Login</Button>
-        </Section>
-      ) : (
-        <Section>
-          <Section>
-            <Typography>Set Goal:</Typography>
+    return (
+      <Box p={3}>
+        {alertMessage && (
+          <Box color="black" mt={2} bgcolor="yellow" p={2}>
+            {alertMessage}
+          </Box>
+        )}
+
+        <Typography variant="h2">Admin Page</Typography>
+        {!loggedIn ? (
+          <Box mb={2}>
+            <Typography>Password:</Typography>
             <TextField
-              type="number"
-              value={goal}
-              onChange={handleGoalChange}
+              id="password"
+              type="password"
+              value={password}
+              onChange={this.handlePasswordChange}
+              onKeyUp={this.handlePasswordKeyUp}
+              inputRef={this.passwordRef}
             />
-            <Button variant="contained" onClick={handleSetGoal}>Set</Button>
-          </Section>
-
-          <Typography variant="h3">Players' Guesses:</Typography>
-          <List>
-            {players.map((player) => (
-              <ListItem key={player.id}>
-                <ListItemText primary={`${player.name}'s guess: ${player.guess}`} />
-              </ListItem>
-            ))}
-          </List>
-
-          <Typography variant="h3">Top Players:</Typography>
-          {closestPlayer && (
-            <Typography>
-              Closest player: {closestPlayer.name} with a guess of {closestPlayer.guess}
-            </Typography>
-          )}
-
-          <Button variant="contained" onClick={handleClearPlayers}>Clear Players</Button>
-
-          {alertMessage && (
-            <Box color="black" mt={2} bgcolor="yellow" p={2}>
-              {alertMessage}
+            <Button variant="contained" onClick={this.handleLogin}>
+              Login
+            </Button>
+          </Box>
+        ) : (
+          <Box mb={2}>
+            <Box mb={2}>
+              <Typography>Set Goal:</Typography>
+              <TextField
+                type="number"
+                value={goal}
+                onChange={this.handleGoalChange}
+                inputRef={this.goalRef}
+              />
+              <Button variant="contained" onClick={this.handleSetGoal}>
+                Set
+              </Button>
             </Box>
-          )}
-        </Section>
-      )}
-    </Box>
-  );
-};
+
+            <Typography variant="h3">Players' Guesses:</Typography>
+            <List>
+              {players.map((player, index) => (
+                <ListItem key={player.id}>
+                  <ListItemText
+                    primary={`${index + 1}. ${player.name}'s guess: ${player.guess}`}
+                  />
+                </ListItem>
+              ))}
+            </List>
+
+            <Typography variant="h3">Top Players:</Typography>
+            {closestPlayer && (
+              <Typography>
+                Closest player: {closestPlayer.name} with a guess of{' '}
+                {closestPlayer.guess}
+              </Typography>
+            )}
+
+            <Button variant="contained" onClick={this.handleClearPlayers}>
+              Clear Players
+            </Button>
+          </Box>
+        )}
+      </Box>
+    );
+  }
+}
 
 export default AdminPage;
