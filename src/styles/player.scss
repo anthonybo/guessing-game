@@ -12,3 +12,86 @@ body {
 }
 
 /* Add more styles as needed */
+.player-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .alert-banner {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 9999;
+      }      
+  
+    .title {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+  
+    .form-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 20px;
+      width: 400px;
+  
+      .input-field {
+        width: 100%;
+        margin-bottom: 10px;
+      }
+  
+      .submit-button {
+        width: 100%;
+        margin-top: 10px;
+      }
+    }
+  
+    .guesses-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 400px;
+  
+      .guesses-title {
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 10px;
+      }
+  
+      .guess-item {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        padding: 8px 0;
+  
+        &.top-guess {
+          font-weight: bold;
+        }
+  
+        .guess-index {
+          margin-right: 10px;
+        }
+  
+        .guess-info {
+          flex: 1;
+        }
+      }
+    }
+  
+    .goal-info {
+      font-size: 18px;
+      font-weight: bold;
+      margin-top: 20px;
+    }
+  
+    .alert-message {
+      color: black;
+      margin-top: 20px;
+      background-color: yellow;
+      padding: 10px;
+    }
+  }
+  

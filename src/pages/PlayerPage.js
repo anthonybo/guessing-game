@@ -8,6 +8,7 @@ import {
   ListItem,
   ListItemText,
   Box,
+  Alert
 } from '@mui/material';
 import '../styles/player.scss';
 
@@ -75,56 +76,72 @@ class PlayerPage extends Component {
 
   render() {
     const { players, name, guess, alertMessage, adminGoal } = this.state;
-
+  
     return (
-      <Box p={3}>
-        <Typography variant="h2">Player Page</Typography>
-        <Box mb={2}>
+      <div className="player-page">
+        <h2 className="title">Player Page</h2>
+        <div className="form-container">
           <Typography>Enter Your Name:</Typography>
           <TextField
             type="text"
             value={name}
             onChange={this.handleNameChange}
             fullWidth
+            className="input-field"
           />
-        </Box>
-        <Box mb={2}>
           <Typography>Enter Your Guess:</Typography>
           <TextField
             type="number"
             value={guess}
             onChange={this.handleGuessChange}
             fullWidth
+            className="input-field"
           />
-          <Button variant="contained" onClick={this.handleGuessSubmit}>
+          <Button
+            variant="contained"
+            onClick={this.handleGuessSubmit}
+            className="submit-button"
+          >
             Submit
           </Button>
-        </Box>
-
-        <Typography variant="h3">Players' Guesses:</Typography>
-        <List>
-          {players.map((player, index) => (
-            <ListItem key={player.id}>
-              <ListItemText
-                primary={`${index + 1}. ${player.name}`}
-                secondary={`Guess: ${player.guess}`}
-              />
-            </ListItem>
-          ))}
-        </List>
-
+        </div>
+  
+        <div className="guesses-container">
+          <Typography variant="h3" className="guesses-title">
+            Players' Guesses:
+          </Typography>
+          <List>
+            {players.map((player, index) => (
+              <ListItem
+                key={player.id}
+                className={index === 0 ? 'guess-item top-guess' : 'guess-item'}
+              >
+                <ListItemText
+                  primary={`${index + 1}. ${player.name}`}
+                  secondary={`Guess: ${player.guess}`}
+                  className="guess-info"
+                />
+              </ListItem>
+            ))}
+          </List>
+        </div>
+  
         {adminGoal && (
-          <Typography variant="h4">Admin's Goal: {adminGoal}</Typography>
+          <Typography variant="h4" className="goal-info">
+            Admin's Goal: {adminGoal}
+          </Typography>
         )}
-
+  
         {alertMessage && (
-          <Box color="black" mt={2} bgcolor="yellow" p={2}>
+          <Alert severity="info" className="alert-banner">
             {alertMessage}
-          </Box>
+          </Alert>
         )}
-      </Box>
+      </div>
     );
   }
+  
+  
 }
 
 export default PlayerPage;

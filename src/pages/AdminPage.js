@@ -10,6 +10,8 @@ import {
   Box,
   Fade,
   Slide,
+  Alert,
+  Snackbar,
 } from '@mui/material';
 import '../styles/admin.scss';
 import io from 'socket.io-client';
@@ -28,6 +30,7 @@ class AdminPage extends Component {
       players: [],
       closestPlayer: null,
       alertMessage: '',
+      showAlert: false,
     };
   }
 
@@ -55,9 +58,9 @@ class AdminPage extends Component {
         this.setState({ players: updatedPlayers });
       });
     } else {
-      this.setState({ alertMessage: 'Incorrect password' });
+      this.setState({ alertMessage: 'Incorrect password', showAlert: true });
       setTimeout(() => {
-        this.setState({ alertMessage: '' });
+        this.setState({ alertMessage: '', showAlert: false });
       }, 3000);
     }
   };
@@ -70,18 +73,18 @@ class AdminPage extends Component {
     const { goal } = this.state;
     try {
       await axios.post('http://localhost:2000/api/goal', { goal });
-      this.setState({ alertMessage: 'Goal set successfully!' });
+      this.setState({ alertMessage: 'Goal set successfully!', showAlert: true });
       setTimeout(() => {
-        this.setState({ alertMessage: '' });
+        this.setState({ alertMessage: '', showAlert: false });
       }, 3000);
 
       // Fetch the updated players immediately after setting the goal
       await this.fetchPlayers();
     } catch (error) {
       console.error(error);
-      this.setState({ alertMessage: 'Failed to set the goal.' });
+      this.setState({ alertMessage: 'Failed to set the goal.', showAlert: true });
       setTimeout(() => {
-        this.setState({ alertMessage: '' });
+        this.setState({ alertMessage: '', showAlert: false });
       }, 3000);
     }
   };
@@ -108,15 +111,16 @@ class AdminPage extends Component {
         players: [],
         closestPlayer: null,
         alertMessage: 'Players cleared successfully!',
+        showAlert: true,
       });
       setTimeout(() => {
-        this.setState({ alertMessage: '' });
+        this.setState({ alertMessage: '', showAlert: false });
       }, 3000);
     } catch (error) {
       console.error(error);
-      this.setState({ alertMessage: 'Failed to clear players.' });
+      this.setState({ alertMessage: 'Failed to clear players.', showAlert: true });
       setTimeout(() => {
-        this.setState({ alertMessage: '' });
+        this.setState({ alertMessage: '', showAlert: false });
       }, 3000);
     }
   };
@@ -141,28 +145,31 @@ class AdminPage extends Component {
       players,
       closestPlayer,
       alertMessage,
+      showAlert,
     } = this.state;
 
     return (
       <Fade in={true} timeout={1000}>
         <Box p={3} className="admin-page">
-          {alertMessage && (
-            <Box
-              color="black"
-              mt={2}
-              bgcolor="yellow"
-              p={2}
-              className="alert-box"
-            >
+          <Snackbar
+            open={showAlert}
+            autoHideDuration={3000}
+            onClose={() => this.setState({ showAlert: false })}
+          >
+            <Alert severity="info" sx={{ width: '100%' }}>
               {alertMessage}
-            </Box>
-          )}
+            </Alert>
+          </Snackbar>
 
-          <Typography variant="h2" className="admin-title">Admin Page</Typography>
+          <Typography variant="h2" className="admin-title">
+            Admin Page
+          </Typography>
           {!loggedIn ? (
             <Slide direction="up" in={true} timeout={1000}>
               <Box mb={2} className="login-container">
-                <Typography variant="h4" className="login-label">Password:</Typography>
+                <Typography variant="h4" className="login-label">
+                  Password:
+                </Typography>
                 <TextField
                   id="password"
                   type="password"
@@ -186,7 +193,9 @@ class AdminPage extends Component {
             <Slide direction="up" in={true} timeout={1000}>
               <Box mb={2} className="admin-container">
                 <Box mb={2} className="goal-container">
-                  <Typography variant="h4" className="goal-label">Set Goal:</Typography>
+                  <Typography variant="h4" className="goal-label">
+                    Set Goal:
+                  </Typography>
                   <TextField
                     type="number"
                     value={goal}
@@ -204,21 +213,21 @@ class AdminPage extends Component {
                   </Button>
                 </Box>
 
-                <Typography variant="h3" className="top-players-title">Top Players:</Typography>
+                <Typography variant="h3" className="top-players-title">
+                  Top Players:
+                </Typography>
                 {closestPlayer && (
                   <Typography className="closest-player">
                     Closest player:{' '}
-                    <span className="player-name">
-                      {closestPlayer.name}
-                    </span>{' '}
+                    <span className="player-name">{closestPlayer.name}</span>{' '}
                     with a guess of{' '}
-                    <span className="player-guess">
-                      {closestPlayer.guess}
-                    </span>
+                    <span className="player-guess">{closestPlayer.guess}</span>
                   </Typography>
                 )}
 
-                <Typography variant="h3" className="players-guesses-title">Players' Guesses:</Typography>
+                <Typography variant="h3" className="players-guesses-title">
+                  Players' Guesses:
+                </Typography>
                 <List className="players-list">
                   {players.map((player, index) => (
                     <ListItem key={player.id}>
