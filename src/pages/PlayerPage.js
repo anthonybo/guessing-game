@@ -38,6 +38,12 @@ class PlayerPage extends Component {
 
   handleGuessSubmit = async () => {
     const { name, guess } = this.state;
+
+    if (name.trim() === '' || guess.trim() === '') {
+      this.setState({ alertMessage: 'Please enter both name and guess.' });
+      return;
+    }
+
     try {
       await axios.post('http://localhost:2000/api/players', { name, guess });
       this.setState({
@@ -76,7 +82,7 @@ class PlayerPage extends Component {
 
   render() {
     const { players, name, guess, alertMessage, adminGoal } = this.state;
-  
+
     return (
       <div className="player-page">
         <h2 className="title">Player Page</h2>
@@ -105,7 +111,7 @@ class PlayerPage extends Component {
             Submit
           </Button>
         </div>
-  
+
         <div className="guesses-container">
           <Typography variant="h3" className="guesses-title">
             Players' Guesses:
@@ -125,13 +131,13 @@ class PlayerPage extends Component {
             ))}
           </List>
         </div>
-  
+
         {adminGoal && (
           <Typography variant="h4" className="goal-info">
             Admin's Goal: {adminGoal}
           </Typography>
         )}
-  
+
         {alertMessage && (
           <Alert severity="info" className="alert-banner">
             {alertMessage}
@@ -140,8 +146,6 @@ class PlayerPage extends Component {
       </div>
     );
   }
-  
-  
 }
 
 export default PlayerPage;
