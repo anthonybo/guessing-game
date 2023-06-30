@@ -15,6 +15,7 @@ import {
 } from '@mui/material';
 import '../styles/admin.scss';
 import io from 'socket.io-client';
+import Confetti from 'react-confetti'; // Import the Confetti component
 
 const socket = io('http://localhost:2000', { transports: ['websocket'] });
 
@@ -31,6 +32,7 @@ class AdminPage extends Component {
       closestPlayer: null,
       alertMessage: '',
       showAlert: false,
+      showConfetti: false, // New state variable for displaying confetti
     };
   }
 
@@ -55,7 +57,7 @@ class AdminPage extends Component {
       this.setState({ loggedIn: true });
       this.fetchPlayers();
       socket.on('playersUpdated', (updatedPlayers) => {
-        this.setState({ players: updatedPlayers });
+        this.setState({ players: updatedPlayers, showConfetti: true });
       });
     } else {
       this.setState({ alertMessage: 'Incorrect password', showAlert: true });
@@ -89,20 +91,31 @@ class AdminPage extends Component {
     }
   };
 
-  fetchPlayers = async () => {
-    const { goal } = this.state;
-    try {
-      const response = await axios.get('http://localhost:2000/api/players');
-      const players = response.data;
-      const sortedPlayers = players.sort(
-        (a, b) => Math.abs(goal - a.guess) - Math.abs(goal - b.guess)
-      ); // Sort players based on distance from the admin's goal
-      const closestPlayer = sortedPlayers.length > 0 ? sortedPlayers[0] : null;
-      this.setState({ players: sortedPlayers, closestPlayer });
-    } catch (error) {
-      console.error(error);
+fetchPlayers = async () => {
+  const { goal, players } = this.state;
+
+  try {
+    const response = await axios.get('http://localhost:2000/api/players');
+    const newPlayers = response.data;
+    const sortedPlayers = newPlayers.sort(
+      (a, b) => Math.abs(goal - a.guess) - Math.abs(goal - b.guess)
+    );
+
+    const isNewPlayerGuess = !players.length || players[0].id !== sortedPlayers[0].id;
+    const isNewPlayer = sortedPlayers.some(player => !players.find(p => p.id === player.id));
+
+    if (isNewPlayerGuess && isNewPlayer) {
+      this.setState({ showConfetti: true });
     }
-  };
+
+    this.setState({ players: sortedPlayers });
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+  
+  
 
   handleClearPlayers = async () => {
     try {
@@ -127,15 +140,20 @@ class AdminPage extends Component {
 
   componentDidUpdate(prevProps, prevState) {
     const { players, goal, closestPlayer } = this.state;
-
+  
     if (players.length === 0 || goal === '') {
-      if (closestPlayer !== null) {
+      if (closestPlayer && prevState.closestPlayer !== null) {
         this.setState({ closestPlayer: null });
       }
-    } else if (players.length > 0 && closestPlayer === null) {
+    } else if (players.length > 0 && !prevState.closestPlayer) {
       this.setState({ closestPlayer: players[0] });
     }
   }
+  
+
+  handleConfettiComplete = () => {
+    this.setState({ showConfetti: false });
+  };
 
   render() {
     const {
@@ -146,6 +164,7 @@ class AdminPage extends Component {
       closestPlayer,
       alertMessage,
       showAlert,
+      showConfetti,
     } = this.state;
 
     return (
@@ -250,6 +269,15 @@ class AdminPage extends Component {
                 </Button>
               </Box>
             </Slide>
+          )}
+
+          {showConfetti && (
+            <Confetti
+              width={window.innerWidth}
+              height={window.innerHeight}
+              recycle={false}
+              onConfettiComplete={this.handleConfettiComplete}
+            />
           )}
         </Box>
       </Fade>
