@@ -51,6 +51,11 @@ class PlayerPage extends Component {
         name: '',
         guess: '',
       });
+
+      setTimeout(() => {
+        this.setState({ alertMessage: '' });
+      }, 3000);
+
       this.fetchPlayers(); // Fetch players again to update the top scores immediately
     } catch (error) {
       console.error(error);

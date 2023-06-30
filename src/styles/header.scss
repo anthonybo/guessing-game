@@ -1,0 +1,38 @@
+@import '_variables';
+
+.header {
+  background-color: $primary-color;
+  padding: 20px;
+  text-align: center;
+  height: 100px; /* Adjust the desired height value */
+
+  h1 {
+    font-size: 3rem;
+    font-weight: bold;
+    color: $secondary-color;
+    display: inline-block;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .letter {
+    display: inline-block;
+    animation: letterAnimation 4s infinite linear;
+    font-size: 3em;
+    letter-spacing: 7px;
+  }
+
+  @keyframes letterAnimation {
+    0%,
+    50%,
+    100% {
+      transform: scale(1);
+    }
+    25% {
+      transform: scale(1.5);
+    }
+    75% {
+      transform: scale(1.5);
+    }
+  }
+}
