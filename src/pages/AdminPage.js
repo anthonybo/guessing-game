@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import '../styles/admin.scss';
 import io from 'socket.io-client';
-import Confetti from 'react-confetti'; // Import the Confetti component
+import Confetti from 'react-confetti';
 
 const socket = io('http://localhost:2000', { transports: ['websocket'] });
 
@@ -29,10 +29,10 @@ class AdminPage extends Component {
       loggedIn: false,
       goal: '',
       players: [],
-      closestPlayer: null,
+      closestPlayers: [],
       alertMessage: '',
       showAlert: false,
-      showConfetti: false, // New state variable for displaying confetti
+      showConfetti: false,
     };
   }
 
@@ -52,12 +52,15 @@ class AdminPage extends Component {
 
   handleLogin = () => {
     const { password } = this.state;
-    // Check if the password is correct (you can replace 'adminpassword' with your actual password)
+
     if (password === 'admin') {
       this.setState({ loggedIn: true });
       this.fetchPlayers();
+
       socket.on('playersUpdated', (updatedPlayers) => {
-        this.setState({ players: updatedPlayers, showConfetti: true });
+        this.setState({ players: updatedPlayers, showConfetti: true }, () => {
+          this.updateClosestPlayers();
+        });
       });
     } else {
       this.setState({ alertMessage: 'Incorrect password', showAlert: true });
@@ -73,6 +76,7 @@ class AdminPage extends Component {
 
   handleSetGoal = async () => {
     const { goal } = this.state;
+
     try {
       await axios.post('http://localhost:2000/api/goal', { goal });
       this.setState({ alertMessage: 'Goal set successfully!', showAlert: true });
@@ -80,7 +84,6 @@ class AdminPage extends Component {
         this.setState({ alertMessage: '', showAlert: false });
       }, 3000);
 
-      // Fetch the updated players immediately after setting the goal
       await this.fetchPlayers();
     } catch (error) {
       console.error(error);
@@ -91,38 +94,50 @@ class AdminPage extends Component {
     }
   };
 
-fetchPlayers = async () => {
-  const { goal, players } = this.state;
+  fetchPlayers = async () => {
+    const { goal } = this.state;
 
-  try {
-    const response = await axios.get('http://localhost:2000/api/players');
-    const newPlayers = response.data;
-    const sortedPlayers = newPlayers.sort(
-      (a, b) => Math.abs(goal - a.guess) - Math.abs(goal - b.guess)
-    );
+    try {
+      const response = await axios.get('http://localhost:2000/api/players');
+      const newPlayers = response.data;
 
-    const isNewPlayerGuess = !players.length || players[0].id !== sortedPlayers[0].id;
-    const isNewPlayer = sortedPlayers.some(player => !players.find(p => p.id === player.id));
+      const sortedPlayers = newPlayers.sort(
+        (a, b) => Math.abs(goal - a.guess) - Math.abs(goal - b.guess)
+      );
 
-    if (isNewPlayerGuess && isNewPlayer) {
-      this.setState({ showConfetti: true });
+      this.setState({ players: sortedPlayers }, () => {
+        this.updateClosestPlayers();
+      });
+    } catch (error) {
+      console.error(error);
     }
+  };
 
-    this.setState({ players: sortedPlayers });
-  } catch (error) {
-    console.error(error);
-  }
-};
+  updateClosestPlayers = () => {
+    const { players, goal } = this.state;
+    const closestPlayers = [];
 
-  
-  
+    let closestDiff = Infinity;
+    players.forEach((player) => {
+      const diff = Math.abs(goal - player.guess);
+      if (diff < closestDiff) {
+        closestPlayers.length = 0; // Clear the array
+        closestPlayers.push(player);
+        closestDiff = diff;
+      } else if (diff === closestDiff) {
+        closestPlayers.push(player);
+      }
+    });
+
+    this.setState({ closestPlayers });
+  };
 
   handleClearPlayers = async () => {
     try {
       await axios.post('http://localhost:2000/api/clearPlayers');
       this.setState({
         players: [],
-        closestPlayer: null,
+        closestPlayers: [],
         alertMessage: 'Players cleared successfully!',
         showAlert: true,
       });
@@ -139,17 +154,16 @@ fetchPlayers = async () => {
   };
 
   componentDidUpdate(prevProps, prevState) {
-    const { players, goal, closestPlayer } = this.state;
-  
-    if (players.length === 0 || goal === '') {
-      if (closestPlayer && prevState.closestPlayer !== null) {
-        this.setState({ closestPlayer: null });
+    const { players } = this.state;
+
+    if (players.length === 0) {
+      if (prevState.closestPlayers.length > 0) {
+        this.setState({ closestPlayers: [] });
       }
-    } else if (players.length > 0 && !prevState.closestPlayer) {
-      this.setState({ closestPlayer: players[0] });
+    } else if (players.length > 0 && prevState.players !== players) {
+      this.updateClosestPlayers();
     }
   }
-  
 
   handleConfettiComplete = () => {
     this.setState({ showConfetti: false });
@@ -161,7 +175,7 @@ fetchPlayers = async () => {
       loggedIn,
       goal,
       players,
-      closestPlayer,
+      closestPlayers,
       alertMessage,
       showAlert,
       showConfetti,
@@ -235,27 +249,28 @@ fetchPlayers = async () => {
                 <Typography variant="h3" className="top-players-title">
                   Top Players:
                 </Typography>
-                {closestPlayer && (
-                  <Typography className="closest-player">
-                    Closest player:{' '}
-                    <span className="player-name">{closestPlayer.name}</span>{' '}
-                    with a guess of{' '}
-                    <span className="player-guess">{closestPlayer.guess}</span>
+                {closestPlayers.length > 0 && (
+                  <List className="players-list">
+                    {closestPlayers.map((player, index) => (
+                      <ListItem key={index}>
+                        <ListItemText primary={`${player.name} - ${player.guess}`} />
+                      </ListItem>
+                    ))}
+                  </List>
+                )}
+                {players.length === 0 && (
+                  <Typography variant="h5" className="no-players-message">
+                    No players available.
                   </Typography>
                 )}
 
-                <Typography variant="h3" className="players-guesses-title">
-                  Players' Guesses:
+                <Typography variant="h3" className="all-players-title">
+                  All Players:
                 </Typography>
                 <List className="players-list">
                   {players.map((player, index) => (
-                    <ListItem key={player.id}>
-                      <ListItemText
-                        primary={`${index + 1}. ${player.name}'s guess: ${
-                          player.guess
-                        }`}
-                        className={index === 0 ? 'top-player' : ''}
-                      />
+                    <ListItem key={index}>
+                      <ListItemText primary={`${player.name} - ${player.guess}`} />
                     </ListItem>
                   ))}
                 </List>
